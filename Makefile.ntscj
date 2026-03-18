@@ -1,0 +1,6 @@
+EE_LIB_NAME = librac3ntscj.a
+EE_DEFS = -DUYA_NTSCJ -DRAC3_NTSCJ -DNTSCJ
+
+include ${CURDIR}/Makefile.defs
+include $(PS2SDK)/samples/Makefile.pref
+include ${CURDIR}/Makefile.eeglobal

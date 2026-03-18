@@ -1,0 +1,6 @@
+EE_LIB_NAME = librac3pal.a
+EE_DEFS = -DUYA_PAL -DRAC3_PAL -DPAL
+
+include ${CURDIR}/Makefile.defs
+include $(PS2SDK)/samples/Makefile.pref
+include ${CURDIR}/Makefile.eeglobal
