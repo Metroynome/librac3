@@ -1,5 +1,5 @@
 EE_LIB_NAME = librac3ntscu.a
-EE_DEFS = -DUYA_NTSCU -DRAC3_NTSCU - DNTSCU
+EE_DEFS = -DUYA_NTSCU -DRAC3_NTSCU -DNTSCU
 
 include ${CURDIR}/Makefile.defs
 include $(PS2SDK)/samples/Makefile.pref
