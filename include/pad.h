@@ -23,14 +23,14 @@
 #include "types.h"
 
 #ifdef PAL
-#define P1_PAD                              ((PAD*)0x00138200)
-#define P2_PAD                              ((PAD*)0x00138580)
+#define P1_PAD                              ((PAD*)0x001cd0c0)
+#define P2_PAD                              ((PAD*)0x001cd680)
 #elif NTSCJ
-#define P1_PAD                              ((PAD*)0x00138180)
-#define P2_PAD                              ((PAD*)0x00138500)
+#define P1_PAD                              ((PAD*)0x001d6380)
+#define P2_PAD                              ((PAD*)0x001d6940)
 #else
 #define P1_PAD                              ((PAD*)0x001cd0c0)
-#define P2_PAD                              ((PAD*)0x00138500)
+#define P2_PAD                              ((PAD*)0x001cd680)
 #endif
 
 #define REVERSE_U16(bytes) (bytes >> 8) | (bytes << 8) 
