@@ -8,11 +8,6 @@
 #define __LIBRAC3_SETTER__    inline
 #define __LIBRAC3_INLINE__    inline
 
-#define __LIBRAC2_GETTER__    inline
-#define __LIBRAC2_SETTER__    inline
-#define __LIBRAC2_INLINE__    inline
-
-
 #define true 1
 #define false 0
 typedef _Bool bool;
