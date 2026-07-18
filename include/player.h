@@ -168,7 +168,7 @@ typedef enum PlayerType {
 /* start:
 0x001a4be0
 */
-typedef struct Player { // 0x28e0
+typedef struct Hero { // 0x28e0
 /* 0x0000 */ MATRIX mtx;
 /* 0x0040 */ MATRIX invMtx;
 /* 0x0080 */ VECTOR pos;
@@ -183,6 +183,7 @@ typedef struct Player { // 0x28e0
 /* 0x2870 */ char unk_2870[0x68];
 /* 0x28d8 */ int forceGadgetSwitch;
 /* 0x28dc */ int unk_28dc;
-} Player;
+} Hero;
+typedef Hero Player;
 
 #endif
