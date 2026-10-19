@@ -229,7 +229,9 @@ GetAddressImmediate_exit:
 #--------------------------------------------------------
 #------------------- STANDARD LIBRARY -------------------
 #--------------------------------------------------------
-FUNCTION(printf, 0x0011af48)
+// SDK console output, shared by the verified NTSC-U/PAL/NTSC-J campaign cores.
+// The game CRT printf at 0x0011af48 does not provide this debug output path.
+FUNCTION(printf, 0x00121760)
 FUNCTION(fprintf, 0x00118950)
 #FUNCTION(sprintf, 0x00118cc8)
 FUNCTION(memset, 0x0011a264)
