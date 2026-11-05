@@ -1,8 +1,11 @@
 
-#define GAME_ACTIVE                         (0x00241BD0)
-#define SCENE_LOADED                        (0x002459C8)
-// currently only for NTSCU
-#define GAME_MAP_ID                         (0x001D545C)
+/* Campaign level ID: Veldin is 0. NTSC-J has a different resident global.
+ * These addresses match uya-mod-loader's platformMode regional definitions. */
+#if defined(RAC3_NTSCJ) || defined(UYA_NTSCJ)
+#define GAME_MAP_ID (0x001de75c)
+#else
+#define GAME_MAP_ID (0x001d545c)
+#endif
 
 // fixed address function
 #define FUNCTION(name, address) \
@@ -57,53 +60,40 @@ name:														\
 // 
 	.set	push;
 	.set	noreorder;
-	.section	.text.##__LocalGetAddress,"ax",@progbits;
+	.section	.text.__LocalGetAddress,"ax",@progbits;
 	.align 2;
 	.globl	__LocalGetAddress;
 	.type	__LocalGetAddress,@function;
 	.ent	__LocalGetAddress,0;
 __LocalGetAddress:
-	// if scene is loading, then we have no address
-	li $v1, 1;
-	lw $v0, SCENE_LOADED;
-	bne $v0, $v1, __LocalGetAddress_exit;
-	li $v0, 0;
-
-	// if in menus then return lobby address
-	lw $v0, GAME_MAP_ID;
-  li $v1, 39;
-	beq $v0, $v1, __LocalGetAddress_exit;
-	lw $v0, 0($a0)
-
-	// if not in game then no address
-	lw $v0, GAME_ACTIVE;
-	beq $v0, $zero, __LocalGetAddress_exit;
-	nop;
-
-	// otherwise in game
-	// return address by map
-	lw $v0, GAME_MAP_ID;
-	
-	// map local map ids (50+) to real map ids (40+)
-	addiu $v1, $v0, -10;
-	slti $s0, $v0, 50;
-	movz $v0, $v1, $s0;
-
-	// return 0 if map is not between 40 and 50
-	addiu $v1, $v0, -40
-	sltiu $v0, $v1, 10
-	beqzl $v0, __LocalGetAddress_exit;
+	// Campaign IDs index all 34 fields directly; reject menus and unknown IDs.
+	lw $v1, GAME_MAP_ID;
+	sltiu $v0, $v1, 34;
+	beqz $v0, __LocalGetAddress_exit;
 	move $v0, $zero;
-
-	// load offset into VariableAddress struct by map id
-	sll $v1, $v1, 2; // multiply map id [0,9] by 4
-	addiu $v0, $v1, 4; // offset by 4 to skip lobby address
-
-	// load address from struct
-	addu $a0, $v0;
 	lw $v0, 0($a0);
-
-	// return to calling function
+	bltz $v0, __LocalGetAddress_compact;
+	nop;
+	sll $v1, $v1, 2;
+	addu $v1, $a0, $v1;
+	b __LocalGetAddress_exit;
+	lw $v0, 0($v1);
+__LocalGetAddress_compact:
+	sll $v0, $v0, 1;
+	beqz $v1, __LocalGetAddress_exit;
+	srl $v0, $v0, 1;
+	sll $v1, $v1, 1;
+	addu $v1, $a0, $v1;
+	lhu $v1, 2($v1);
+	bnez $v1, __LocalGetAddress_offset;
+	nop;
+	b __LocalGetAddress_exit;
+	move $v0, $zero;
+__LocalGetAddress_offset:
+	xori $v1, $v1, 0x8000;
+	sll $v1, $v1, 16;
+	sra $v1, $v1, 14;
+	addu $v0, $v0, $v1;
 __LocalGetAddress_exit:
 	jr $a1;
 	nop;
@@ -114,53 +104,40 @@ __LocalGetAddress_exit:
 // 
 	.set	push;
 	.set	noreorder;
-	.section	.text.##GetAddress,"ax",@progbits;
+	.section	.text.GetAddress,"ax",@progbits;
 	.align 2;
 	.globl	GetAddress;
 	.type	GetAddress,@function;
 	.ent	GetAddress,0;
 GetAddress:
-	// if scene is loading, then we have no address
-	li $v1, 1;
-	lw $v0, SCENE_LOADED;
-	bne $v0, $v1, GetAddress_exit;
-	li $v0, 0;
-
-	// if in menus then return lobby address
-	lw $v0, GAME_MAP_ID;
-  li $v1, 39;
-	beq $v0, $v1, GetAddress_exit;
-	lw $v0, 0($a0)
-
-	// if not in game then no address
-	lw $v0, GAME_ACTIVE;
-	beq $v0, $zero, GetAddress_exit;
-	nop;
-
-	// otherwise in game
-	// return address by map
-	lw $v0, GAME_MAP_ID;
-	
-	// map local map ids (50+) to real map ids (40+)
-	addiu $v1, $v0, -10;
-	slti $t0, $v0, 50;
-	movz $v0, $v1, $t0;
-
-	// return 0 if map is not between 40 and 50
-	addiu $v1, $v0, -40
-	sltiu $v0, $v1, 10
-	beqzl $v0, GetAddress_exit;
+	// Campaign IDs index all 34 fields directly; reject menus and unknown IDs.
+	lw $v1, GAME_MAP_ID;
+	sltiu $v0, $v1, 34;
+	beqz $v0, GetAddress_exit;
 	move $v0, $zero;
-
-	// load offset into VariableAddress struct by map id
-	sll $v1, $v1, 2; // multiply map id [0,9] by 4
-	addiu $v0, $v1, 4; // offset by 4 to skip lobby address
-
-	// load address from struct
-	addu $a0, $v0;
 	lw $v0, 0($a0);
-
-	// return to calling function
+	bltz $v0, GetAddress_compact;
+	nop;
+	sll $v1, $v1, 2;
+	addu $v1, $a0, $v1;
+	b GetAddress_exit;
+	lw $v0, 0($v1);
+GetAddress_compact:
+	sll $v0, $v0, 1;
+	beqz $v1, GetAddress_exit;
+	srl $v0, $v0, 1;
+	sll $v1, $v1, 1;
+	addu $v1, $a0, $v1;
+	lhu $v1, 2($v1);
+	bnez $v1, GetAddress_offset;
+	nop;
+	b GetAddress_exit;
+	move $v0, $zero;
+GetAddress_offset:
+	xori $v1, $v1, 0x8000;
+	sll $v1, $v1, 16;
+	sra $v1, $v1, 14;
+	addu $v0, $v0, $v1;
 GetAddress_exit:
 	jr $ra;
 	nop;
@@ -171,53 +148,40 @@ GetAddress_exit:
 // 
 	.set	push;
 	.set	noreorder;
-	.section	.text.##GetAddress,"ax",@progbits;
+	.section	.text.GetAddressImmediate,"ax",@progbits;
 	.align 2;
 	.globl	GetAddressImmediate;
 	.type	GetAddressImmediate,@function;
 	.ent	GetAddressImmediate,0;
 GetAddressImmediate:
-	// if scene is loading, then we have no address
-	//li $v1, 1;
-	//lw $v0, SCENE_LOADED;
-	//bne $v0, $v1, GetAddressImmediate_exit;
-	//li $v0, 0;
-
-	// if in menus then return lobby address
-	lw $v0, GAME_MAP_ID;
-  li $v1, 39;
-	beq $v0, $v1, GetAddressImmediate_exit;
-	lw $v0, 0($a0)
-
-	// if not in game then no address
-	//lw $v0, GAME_ACTIVE;
-	//beq $v0, $zero, GetAddressImmediate_exit;
-	//nop;
-
-	// otherwise in game
-	// return address by map
-	lw $v0, GAME_MAP_ID;
-	
-	// map local map ids (50+) to real map ids (40+)
-	addiu $v1, $v0, -10;
-	slti $t0, $v0, 50;
-	movz $v0, $v1, $t0;
-
-	// return 0 if map is not between 40 and 50
-	addiu $v1, $v0, -40
-	sltiu $v0, $v1, 10
-	beqzl $v0, GetAddressImmediate_exit;
+	// Campaign IDs index all 34 fields directly; reject menus and unknown IDs.
+	lw $v1, GAME_MAP_ID;
+	sltiu $v0, $v1, 34;
+	beqz $v0, GetAddressImmediate_exit;
 	move $v0, $zero;
-
-	// load offset into VariableAddress struct by map id
-	sll $v1, $v1, 2; // multiply map id [0,9] by 4
-	addiu $v0, $v1, 4; // offset by 4 to skip lobby address
-
-	// load address from struct
-	addu $a0, $v0;
 	lw $v0, 0($a0);
-
-	// return to calling function
+	bltz $v0, GetAddressImmediate_compact;
+	nop;
+	sll $v1, $v1, 2;
+	addu $v1, $a0, $v1;
+	b GetAddressImmediate_exit;
+	lw $v0, 0($v1);
+GetAddressImmediate_compact:
+	sll $v0, $v0, 1;
+	beqz $v1, GetAddressImmediate_exit;
+	srl $v0, $v0, 1;
+	sll $v1, $v1, 1;
+	addu $v1, $a0, $v1;
+	lhu $v1, 2($v1);
+	bnez $v1, GetAddressImmediate_offset;
+	nop;
+	b GetAddressImmediate_exit;
+	move $v0, $zero;
+GetAddressImmediate_offset:
+	xori $v1, $v1, 0x8000;
+	sll $v1, $v1, 16;
+	sra $v1, $v1, 14;
+	addu $v0, $v0, $v1;
 GetAddressImmediate_exit:
 	jr $ra;
 	nop;

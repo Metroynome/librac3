@@ -48,7 +48,59 @@ typedef struct VariableAddress {
 	u32 VidComic6;
 } VariableAddress_t;
 
-u32 GetAddress(VariableAddress_t* address);
-u32 GetAddressImmediate(VariableAddress_t* address);
+/* Veldin is the absolute base and its high bit tags compact tables.
+ * Other fields are signed word offsets biased by 0x8000; zero is unavailable.
+ * These tables describe low EE addresses, not cached/kernel aliases.
+ */
+#define RAC3_VA_COMPACT_BASE(address) ((u32)(address) | (u32)0x80000000)
+#define RAC3_VA_COMPACT_OFFSET(base, address) ((address) == 0 ? 0 : \
+	(u16)(((s32)(address) - (s32)(base)) / 4 + 0x8000 + \
+	0 * sizeof(char[((address) == 0 || (((s32)(address) - (s32)(base)) % 4 == 0 && \
+	((s32)(address) - (s32)(base)) / 4 >= -32767 && \
+	((s32)(address) - (s32)(base)) / 4 <= 32767)) ? 1 : -1])))
+
+typedef struct rac3VariableAddressCompact {
+	/* 0x00 */ u32 Veldin;
+	/* 0x04 */ u16 Florana;
+	/* 0x06 */ u16 Starship1;
+	/* 0x08 */ u16 Marcadia;
+	/* 0x0a */ u16 Daxx;
+	/* 0x0c */ u16 Starship2;
+	/* 0x0e */ u16 AnniNation;
+	/* 0x10 */ u16 Aquatos;
+	/* 0x12 */ u16 Tyhrranosis;
+	/* 0x14 */ u16 Zeldrin;
+	/* 0x16 */ u16 ObaniMoons;
+	/* 0x18 */ u16 Rilgar;
+	/* 0x1a */ u16 Holostar1;
+	/* 0x1c */ u16 Koros;
+	/* 0x1e */ u16 Kerwan;
+	/* 0x20 */ u16 CrashSite;
+	/* 0x22 */ u16 Aridia;
+	/* 0x24 */ u16 Thran;
+	/* 0x26 */ u16 FinalBoss;
+	/* 0x28 */ u16 ObaniDraco;
+	/* 0x2a */ u16 Mylon;
+	/* 0x2c */ u16 HolostarClank;
+	/* 0x2e */ u16 Museum;
+	/* 0x30 */ u16 KerwanRanger;
+	/* 0x32 */ u16 AquatosBase;
+	/* 0x34 */ u16 AquatosSewers;
+	/* 0x36 */ u16 Ranger2;
+	/* 0x38 */ u16 VidComic0;
+	/* 0x3a */ u16 VidComic1;
+	/* 0x3c */ u16 VidComic4;
+	/* 0x3e */ u16 VidComic2;
+	/* 0x40 */ u16 VidComic3;
+	/* 0x42 */ u16 VidComic5;
+	/* 0x44 */ u16 VidComic6;
+	/* 0x46: two bytes of tail padding on the EE ABI. */
+} rac3VariableAddressCompact_t;
+
+/* Both formats accept campaign IDs 0..33; menu/unknown IDs return zero.
+ * The caller must ensure the campaign overlay is ready before calling a result.
+ * No verified campaign loading flag is currently available in this library. */
+u32 GetAddress(const void* address);
+u32 GetAddressImmediate(const void* address);
 
 #endif // _LIBRAC3_INTEROP_H_
