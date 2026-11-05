@@ -52,3 +52,25 @@ three resolver entry points in 756 cases, covering both formats, all 34 slots,
 missing entries, equal-to-base entries, offset boundaries, and invalid IDs.
 Table object sizes were measured with the EE compiler. Campaign gameplay and
 loading transitions have not yet been tested in PCSX2 for this change.
+
+## Compact address tables
+
+The resolver accepts original full `VariableAddress_t` tables, fixed-base `rac3VariableAddressCompact_t` tables, and selectable-base `rac3VariableAddressCompactBase_t` tables. Full-table ABI is unchanged. Fixed compact tables occupy 72 bytes; custom-base tables occupy 72 bytes on the EE.
+
+```c
+/* Illustrative values; not verified game addresses. */
+rac3VariableAddressCompact_t vaFixed = {
+	.Veldin = RAC3_VA_COMPACT_BASE(0x00400000),
+	.Florana = RAC3_VA_COMPACT_OFFSET(0x00400000, 0x00400100),
+};
+
+rac3VariableAddressCompactBase_t vaCustom = {
+	.Base = RAC3_VA_COMPACT_CUSTOM_BASE(0x00400100),
+	.Veldin = RAC3_VA_COMPACT_OFFSET(0x00400100, 0x00400000),
+	.Florana = RAC3_VA_COMPACT_OFFSET(0x00400100, 0x00400100),
+};
+```
+
+The first stored word carries the format marker: 0x80000000 for fixed-base compact, 0xc0000000 for custom-base compact. The resolver removes both marker bits before using the base. Use low EE addresses (or REL offsets), without marker bits, as OFFSET arguments. Nonzero map entries must differ from the chosen base by a multiple of four within +/-32767 words. Encoded zero is unavailable; 0x8000 represents the same address as the base. A custom base need not match any map entry, and omitted maps remain unavailable.
+
+The unpublished menu/lobby-tagged compact layout has been replaced. Update old compact initializers and rebuild their consumers together with this resolver; old compact binaries are not supported by the revised menu-bearing layouts. Full tables remain compatible. librac3's existing fixed Veldin layout retains its encoding. No live PCSX2 verification was performed for this change.
