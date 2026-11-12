@@ -138,7 +138,7 @@ typedef struct rac3VariableAddressCompactBase {
 	/* 0x46 */ u16 VidComic6;
 } rac3VariableAddressCompactBase_t;
 
-/* Both formats accept campaign IDs 0..33; menu/unknown IDs return zero.
+/* Both formats accept campaign IDs 1..36, excluding 15 and 25; other IDs return zero.
  * The caller must ensure the campaign overlay is ready before calling a result.
  * No verified campaign loading flag is currently available in this library. */
 u32 GetAddress(const void* address);

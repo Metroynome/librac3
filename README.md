@@ -28,8 +28,8 @@ Omitted slots remain unavailable. Only low EE addresses are supported by the
 format tag; do not use it with kernel or uncached address aliases.
 
 `GetAddress`, `GetAddressImmediate`, and the assembly variable-function resolver
-accept either format. Campaign IDs 0 through 33 index the fields in declaration
-order; negative/menu and unknown IDs return zero. NTSC-U/PAL read the level ID
+accept either format. Campaign disc IDs 1 through 36 (excluding 15 and 25) map to the fields
+in declaration order; negative/menu and unknown IDs return zero. NTSC-U/PAL read the level ID
 at `0x001d545c`; NTSC-J uses `0x001de75c`, matching the mod loader's regional
 platform definitions. This replaces the previous unused multiplayer-style
 39/40..49 lookup and multiplayer state checks in this campaign library.
@@ -74,3 +74,12 @@ rac3VariableAddressCompactBase_t vaCustom = {
 The first stored word carries the format marker: 0x80000000 for fixed-base compact, 0xc0000000 for custom-base compact. The resolver removes both marker bits before using the base. Use low EE addresses (or REL offsets), without marker bits, as OFFSET arguments. Nonzero map entries must differ from the chosen base by a multiple of four within +/-32767 words. Encoded zero is unavailable; 0x8000 represents the same address as the base. A custom base need not match any map entry, and omitted maps remain unavailable.
 
 The unpublished menu/lobby-tagged compact layout has been replaced. Update old compact initializers and rebuild their consumers together with this resolver; old compact binaries are not supported by the revised menu-bearing layouts. Full tables remain compatible. librac3's existing fixed Veldin layout retains its encoding. No live PCSX2 verification was performed for this change.
+
+## Music
+
+`music.h` exposes the native campaign stream, descriptor table, sector base,
+level ID, and Play entry point for NTSC-U, PAL, and NTSC-J. Play addresses use
+compact tables; the caller must check overlay readiness before executing them.
+Queue and Transition are at Play + `0x2f8` and Play + `0x210` in campaign levels.
+These offsets were checked in all 34 extracted campaign overlays per region.
+Boot has no Queue or Transition entry point. Live NTSC-J/PAL testing is pending.

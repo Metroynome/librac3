@@ -66,11 +66,22 @@ name:														\
 	.type	__LocalGetAddress,@function;
 	.ent	__LocalGetAddress,0;
 __LocalGetAddress:
-	// Campaign IDs index all 34 fields directly; reject menus and unknown IDs.
+	// Disc IDs are 1..36, with unused IDs 15 and 25.
 	lw $v1, GAME_MAP_ID;
-	sltiu $v0, $v1, 34;
+	addiu $v1, $v1, -1;
+	sltiu $v0, $v1, 36;
 	beqz $v0, __LocalGetAddress_exit;
 	move $v0, $zero;
+	li $t8, 14;
+	beq $v1, $t8, __LocalGetAddress_exit;
+	li $t8, 24;
+	beq $v1, $t8, __LocalGetAddress_exit;
+	sltiu $t8, $v1, 25;
+	xori $t8, $t8, 1;
+	subu $v1, $v1, $t8;
+	sltiu $t8, $v1, 14;
+	xori $t8, $t8, 1;
+	subu $v1, $v1, $t8;
 	lw $v0, 0($a0);
 	bgez $v0, __LocalGetAddress_full;
 	nop;
@@ -117,11 +128,22 @@ __LocalGetAddress_exit:
 	.type	GetAddress,@function;
 	.ent	GetAddress,0;
 GetAddress:
-	// Campaign IDs index all 34 fields directly; reject menus and unknown IDs.
+	// Disc IDs are 1..36, with unused IDs 15 and 25.
 	lw $v1, GAME_MAP_ID;
-	sltiu $v0, $v1, 34;
+	addiu $v1, $v1, -1;
+	sltiu $v0, $v1, 36;
 	beqz $v0, GetAddress_exit;
 	move $v0, $zero;
+	li $t8, 14;
+	beq $v1, $t8, GetAddress_exit;
+	li $t8, 24;
+	beq $v1, $t8, GetAddress_exit;
+	sltiu $t8, $v1, 25;
+	xori $t8, $t8, 1;
+	subu $v1, $v1, $t8;
+	sltiu $t8, $v1, 14;
+	xori $t8, $t8, 1;
+	subu $v1, $v1, $t8;
 	lw $v0, 0($a0);
 	bgez $v0, GetAddress_full;
 	nop;
@@ -168,11 +190,22 @@ GetAddress_exit:
 	.type	GetAddressImmediate,@function;
 	.ent	GetAddressImmediate,0;
 GetAddressImmediate:
-	// Campaign IDs index all 34 fields directly; reject menus and unknown IDs.
+	// Disc IDs are 1..36, with unused IDs 15 and 25.
 	lw $v1, GAME_MAP_ID;
-	sltiu $v0, $v1, 34;
+	addiu $v1, $v1, -1;
+	sltiu $v0, $v1, 36;
 	beqz $v0, GetAddressImmediate_exit;
 	move $v0, $zero;
+	li $t8, 14;
+	beq $v1, $t8, GetAddressImmediate_exit;
+	li $t8, 24;
+	beq $v1, $t8, GetAddressImmediate_exit;
+	sltiu $t8, $v1, 25;
+	xori $t8, $t8, 1;
+	subu $v1, $v1, $t8;
+	sltiu $t8, $v1, 14;
+	xori $t8, $t8, 1;
+	subu $v1, $v1, $t8;
 	lw $v0, 0($a0);
 	bgez $v0, GetAddressImmediate_full;
 	nop;
